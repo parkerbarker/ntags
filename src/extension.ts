@@ -1,27 +1,32 @@
 import * as vscode from 'vscode';
 import { initializeDatabase, closeDatabase } from './data/database';
-import { addTagCommand, addTagToFileCommand } from './commands/tagCommands';
+import { addTagCommand, addTagToFileCommand, selectTagCommand, removeTagCommand } from './commands/tagCommands';
 import { TagsViewProvider } from './views/tagView';
 
 export async function activate(context: vscode.ExtensionContext) {
   await initializeDatabase();
 
   const tagsViewProvider = new TagsViewProvider();
-  vscode.window.registerTreeDataProvider('ntag.tagsView', tagsViewProvider);
+  vscode.window.registerTreeDataProvider('ntags.tagsView', tagsViewProvider);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('nTags.addTag', async () => {
-      console.log("15")
-      await addTagCommand();
+    vscode.commands.registerCommand('ntags.addTag', async () => {
+      await addTagCommand(tagsViewProvider);
+      tagsViewProvider.refresh();
+    }),
+    vscode.commands.registerCommand('ntags.addTagToFile', async (uri: vscode.Uri) => {
+      await addTagToFileCommand(uri, tagsViewProvider);
+      tagsViewProvider.refresh();
+    }),
+    vscode.commands.registerCommand('ntags.selectTag', async () => {
+      await selectTagCommand(tagsViewProvider);
+    }),
+    vscode.commands.registerCommand('ntags.removeTag', async () => {
+      await removeTagCommand(tagsViewProvider);
       tagsViewProvider.refresh();
     }),
     new vscode.Disposable(() => {
       closeDatabase();
-    }),
-    vscode.commands.registerCommand('ntag.addTagToFile', async (uri: vscode.Uri) => {
-      console.log("23")
-      await addTagToFileCommand(uri);
-      tagsViewProvider.refresh();
     })
   );
 }

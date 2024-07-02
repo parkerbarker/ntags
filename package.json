@@ -14,26 +14,46 @@
   "contributes": {
     "commands": [
       {
-        "command": "nTags.addTag",
+        "command": "ntags.addTag",
         "title": "nTags: Add Tag"
       },
       {
-        "command": "ntag.addTagToFile",
+        "command": "ntags.selectTag",
+        "title": "nTags: Select Tag"
+      },
+      {
+        "command": "ntags.addTagToFile",
         "title": "Add Tag to File"
+      },
+      {
+        "command": "ntags.removeTag",
+        "title": "Remove Tag"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "ntag.addTagToFile",
+          "command": "ntags.addTagToFile",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ntags.addTagToFile",
+          "when": "view == ntags.tagsView && viewItem == file",
+          "group": "inline"
+        },
+        {
+          "command": "ntags.removeTag",
+          "when": "view == ntags.tagsView && viewItem == file",
+          "group": "inline"
         }
       ]
     },
     "views": {
       "explorer": [
         {
-          "id": "ntag.tagsView",
+          "id": "ntags.tagsView",
           "name": "Tags View"
         }
       ]

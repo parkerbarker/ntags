@@ -1,4 +1,4 @@
-import initSqlJs, { Database } from 'sql.js';
+import initSqlJs, { Database, SqlValue } from 'sql.js';
 import { getDiff, adjustTagPositions } from '../services/gitService';
 
 let db: Database;
@@ -85,10 +85,57 @@ export function getTagsForFile(filePath: string): TagRow[] {
   return results;
 }
 
+export function getFilePathsForTag(tagName: string): string[] {
+  const fileResults = db.exec(
+    'SELECT file_path FROM Tags JOIN FileTags ON Tags.tag_id = FileTags.tag_id JOIN Files ON FileTags.file_id = Files.file_id WHERE Tags.tag_name = ?',
+    [tagName as SqlValue]
+  );
+
+  if (fileResults.length === 0) {
+    console.log(`No files found for tag: ${tagName}`);
+    return [];
+  }
+
+  const filePaths = fileResults[0].values.map(row => row[0] as string);
+  console.log(`Files for tag ${tagName}:`, filePaths);
+  return filePaths;
+}
+
 // Delete a tag
 export function deleteTag(tagId: number): void {
   const stmt = db.prepare('DELETE FROM Tags WHERE tag_id = ?');
   stmt.run([tagId]);
+}
+export function getTags(): string[] {
+  const tagResults = db.exec('SELECT DISTINCT tag_name FROM Tags');
+  if (tagResults.length === 0) {
+    console.log('No tags found');
+    return [];
+  }
+
+  const tags = tagResults[0].values.map(row => row[0] as string);
+  console.log('Tags:', tags);
+  return tags;
+}
+
+export async function removeTagFromFile(filePath: string, tagName: string, refreshCallback?: () => void): Promise<void> {
+  const fileIdResult = db.exec('SELECT file_id FROM Files WHERE file_path = ?', [filePath]);
+  if (fileIdResult.length === 0) {
+    return;
+  }
+
+  const tagIdResult = db.exec('SELECT tag_id FROM Tags WHERE tag_name = ?', [tagName]);
+  if (tagIdResult.length === 0) {
+    return;
+  }
+  const tagId = tagIdResult[0].values[0][0] as number;
+
+  deleteTag(tagId);
+
+  // Call the refresh callback if provided
+  if (refreshCallback) {
+    refreshCallback();
+  }
 }
 
 // Adjust tag positions based on Git diff

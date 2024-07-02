@@ -1,10 +1,14 @@
-import { db, addFile, addTag, addFileTag } from '../data/database';
-import * as path from 'path';
+import { db, addFile, addTag, addFileTag, deleteTag } from '../data/database';
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 export async function addTagToFile(filePath: string, tagName: string, tagType: string, startLine?: number, endLine?: number, refreshCallback?: () => void): Promise<void> {
-  const baseDir = getBaseDirectory();
-  const relativePath = path.relative(baseDir, filePath);
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
+  if (!workspaceFolder) {
+    vscode.window.showErrorMessage('File is not within a workspace folder');
+    return;
+  }
+  const relativePath = path.relative(workspaceFolder.uri.fsPath, filePath);
 
   // Ensure the file exists in the Files table
   const fileIdResult = db.exec('SELECT file_id FROM Files WHERE file_path = ?', [relativePath]);
@@ -33,11 +37,29 @@ export async function addTagToFile(filePath: string, tagName: string, tagType: s
   }
 }
 
-function getBaseDirectory(): string {
-  // Use the workspace folder as the base directory
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (workspaceFolders && workspaceFolders.length > 0) {
-    return workspaceFolders[0].uri.fsPath;
+export async function removeTagFromFile(filePath: string, tagName: string, refreshCallback?: () => void): Promise<void> {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
+  if (!workspaceFolder) {
+    vscode.window.showErrorMessage('File is not within a workspace folder');
+    return;
   }
-  return '';
+  const relativePath = path.relative(workspaceFolder.uri.fsPath, filePath);
+
+  const fileIdResult = db.exec('SELECT file_id FROM Files WHERE file_path = ?', [relativePath]);
+  if (fileIdResult.length === 0) {
+    return;
+  }
+
+  const tagIdResult = db.exec('SELECT tag_id FROM Tags WHERE tag_name = ?', [tagName]);
+  if (tagIdResult.length === 0) {
+    return;
+  }
+  const tagId = tagIdResult[0].values[0][0] as number;
+
+  deleteTag(tagId);
+
+  // Call the refresh callback if provided
+  if (refreshCallback) {
+    refreshCallback();
+  }
 }

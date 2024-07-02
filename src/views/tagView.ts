@@ -1,15 +1,29 @@
 import * as vscode from 'vscode';
-import { db } from '../data/database';
+import { getFilePathsForTag } from '../data/database';
 import * as path from 'path';
 
-interface TagNode {
-  tag: string;
-  files: string[];
+class FileItem extends vscode.TreeItem {
+  constructor(public readonly relativePath: string, public readonly uri: vscode.Uri) {
+    super(relativePath, vscode.TreeItemCollapsibleState.None);
+    this.resourceUri = uri;
+    this.command = { command: 'vscode.open', title: 'Open File', arguments: [uri] };
+    this.contextValue = 'file';
+  }
 }
 
-export class TagsViewProvider implements vscode.TreeDataProvider<TagNode> {
-  private _onDidChangeTreeData: vscode.EventEmitter<TagNode | undefined | void> = new vscode.EventEmitter<TagNode | undefined | void>();
-  readonly onDidChangeTreeData: vscode.Event<TagNode | undefined | void> = this._onDidChangeTreeData.event;
+class FolderItem extends vscode.TreeItem {
+  constructor(public readonly relativePath: string) {
+    super(relativePath, vscode.TreeItemCollapsibleState.Collapsed);
+    this.contextValue = 'folder';
+  }
+}
+
+export class TagsViewProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+  private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | void>();
+  readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | void> = this._onDidChangeTreeData.event;
+
+  private currentTag: string | undefined;
+  private fileTree: { [folder: string]: Array<FileItem | FolderItem> } = {};
 
   constructor() {}
 
@@ -17,51 +31,61 @@ export class TagsViewProvider implements vscode.TreeDataProvider<TagNode> {
     this._onDidChangeTreeData.fire();
   }
 
-  getTreeItem(element: TagNode): vscode.TreeItem {
-    const treeItem = new vscode.TreeItem(element.tag, vscode.TreeItemCollapsibleState.Collapsed);
-    treeItem.description = `${element.files.length} file(s)`;
-    return treeItem;
+  setTag(tag: string) {
+    this.currentTag = tag;
+    this.fileTree = {}; // Clear the file tree when the tag changes
   }
 
-  getChildren(element?: TagNode): Thenable<TagNode[]> {
+  getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
+    return element;
+  }
+
+  async getChildren(element?: vscode.TreeItem): Promise<vscode.TreeItem[]> {
+    if (!this.currentTag) {
+      return [];
+    }
+
     if (element) {
-      // If the element has children, return an empty array to prevent further nesting
-      return Promise.resolve([]);
+      // Return children for the folder
+      const folderPath = (element as FolderItem).relativePath;
+      return this.fileTree[folderPath] || [];
     } else {
-      return this.getTags();
-    }
-  }
-
-  private async getTags(): Promise<TagNode[]> {
-    const tags: TagNode[] = [];
-    const baseDir = this.getBaseDirectory();
-    const tagResults = db.exec('SELECT tag_name, file_path FROM Tags JOIN FileTags ON Tags.tag_id = FileTags.tag_id JOIN Files ON FileTags.file_id = Files.file_id');
-
-    if(tagResults.length === 0) {return [];}
-
-    const tagMap: { [tag: string]: string[] } = {};
-    for (const row of tagResults[0].values) {
-      const tag = row[0] as string;
-      const relativePath = row[1] as string;
-      const file = path.join(baseDir, relativePath);
-      if (!tagMap[tag]) {
-        tagMap[tag] = [];
+      // Get the file tree for the current tag
+      if (Object.keys(this.fileTree).length === 0) {
+        await this.buildFileTree();
       }
-      tagMap[tag].push(file);
+      return this.fileTree[''] || [];
     }
-
-    for (const tag in tagMap) {
-      tags.push({ tag, files: tagMap[tag] });
-    }
-
-    return tags;
   }
 
-  private getBaseDirectory(): string {
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (workspaceFolders && workspaceFolders.length > 0) {
-      return workspaceFolders[0].uri.fsPath;
+  private async buildFileTree() {
+    const filePaths = getFilePathsForTag(this.currentTag!);
+
+    if (filePaths.length === 0) {
+      return;
     }
-    return '';
+
+    for (const relativePath of filePaths) {
+      const uri = vscode.Uri.file(relativePath);
+
+      const parts = relativePath.split(path.sep);
+      let currentPath = '';
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        const isFile = i === parts.length - 1;
+        const parentPath = currentPath;
+        currentPath = path.join(currentPath, part);
+
+        if (!this.fileTree[parentPath]) {
+          this.fileTree[parentPath] = [];
+        }
+
+        if (isFile) {
+          this.fileTree[parentPath].push(new FileItem(part, uri));
+        } else if (!this.fileTree[parentPath].some(item => item.label === part && item.contextValue === 'folder')) {
+          this.fileTree[parentPath].push(new FolderItem(part));
+        }
+      }
+    }
   }
 }
