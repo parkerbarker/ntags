@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { initializeDatabase, closeDatabase } from './data/database';
-import { addTagCommand } from './commands/tagCommands';
+import { addTagCommand, addTagToFileCommand } from './commands/tagCommands';
 
 export async function activate(context: vscode.ExtensionContext) {
   await initializeDatabase();
@@ -11,6 +11,9 @@ export async function activate(context: vscode.ExtensionContext) {
     }),
     new vscode.Disposable(() => {
       closeDatabase();
+    }),
+    vscode.commands.registerCommand('ntag.addTagToFile', async (uri: vscode.Uri) => {
+      await addTagToFileCommand(uri);
     })
   );
 }

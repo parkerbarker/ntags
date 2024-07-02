@@ -43,3 +43,35 @@ export async function addTagCommand() {
 
   vscode.window.showInformationMessage(`Tag added to ${filePath}`);
 }
+
+export async function addTagToFileCommand(uri: vscode.Uri) {
+  const tagTypes = [
+    'function',
+    'class',
+    'variable',
+    'condition',
+    'loop',
+    'import',
+    'custom',
+    'comment',
+    'interface',
+    'todo'
+  ];
+
+  const filePath = uri.fsPath;
+
+  const tagName = await vscode.window.showInputBox({ prompt: 'Enter the tag name' });
+  if (!tagName) return;
+
+  const tagType = await vscode.window.showQuickPick(tagTypes, { placeHolder: 'Select the tag type' });
+  if (!tagType) return;
+
+  // Get the total number of lines in the file
+  const document = await vscode.workspace.openTextDocument(uri);
+  const totalLines = document.lineCount;
+
+  // Tag the entire file
+  await addTagToFile(filePath, tagName, 0, totalLines - 1, tagType);
+
+  vscode.window.showInformationMessage(`Tag added to ${filePath}`);
+}

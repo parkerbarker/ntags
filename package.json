@@ -16,8 +16,20 @@
       {
         "command": "nTags.addTag",
         "title": "nTags: Add Tag"
+      },
+      {
+        "command": "ntag.addTagToFile",
+        "title": "Add Tag to File"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "ntag.addTagToFile",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
