@@ -28,6 +28,7 @@ export class TagsViewProvider implements vscode.TreeDataProvider<vscode.TreeItem
   constructor() {}
 
   refresh(): void {
+    this.fileTree = {}; // Clear the file tree when refreshing
     this._onDidChangeTreeData.fire();
   }
 
@@ -65,8 +66,10 @@ export class TagsViewProvider implements vscode.TreeDataProvider<vscode.TreeItem
       return;
     }
 
+    const baseDir = this.getBaseDirectory();
     for (const relativePath of filePaths) {
-      const uri = vscode.Uri.file(relativePath);
+      const absolutePath = path.join(baseDir, relativePath);
+      const uri = vscode.Uri.file(absolutePath);
 
       const parts = relativePath.split(path.sep);
       let currentPath = '';
@@ -87,5 +90,13 @@ export class TagsViewProvider implements vscode.TreeDataProvider<vscode.TreeItem
         }
       }
     }
+  }
+
+  private getBaseDirectory(): string {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+      return workspaceFolders[0].uri.fsPath;
+    }
+    return '';
   }
 }

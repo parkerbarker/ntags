@@ -92,12 +92,10 @@ export function getFilePathsForTag(tagName: string): string[] {
   );
 
   if (fileResults.length === 0) {
-    console.log(`No files found for tag: ${tagName}`);
     return [];
   }
 
   const filePaths = fileResults[0].values.map(row => row[0] as string);
-  console.log(`Files for tag ${tagName}:`, filePaths);
   return filePaths;
 }
 
@@ -109,12 +107,10 @@ export function deleteTag(tagId: number): void {
 export function getTags(): string[] {
   const tagResults = db.exec('SELECT DISTINCT tag_name FROM Tags');
   if (tagResults.length === 0) {
-    console.log('No tags found');
     return [];
   }
 
   const tags = tagResults[0].values.map(row => row[0] as string);
-  console.log('Tags:', tags);
   return tags;
 }
 

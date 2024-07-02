@@ -80,7 +80,6 @@ export async function selectTagCommand(tagsViewProvider: TagsViewProvider) {
   });
 
   if (selectedTag) {
-    console.log(`Selected tag: ${selectedTag}`);
     tagsViewProvider.setTag(selectedTag);
     tagsViewProvider.refresh();
   }
