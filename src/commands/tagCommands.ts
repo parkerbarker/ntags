@@ -28,18 +28,11 @@ export async function addTagCommand() {
   const tagName = await vscode.window.showInputBox({ prompt: 'Enter the tag name' });
   if (!tagName) {return;}
 
-  const startLineStr = await vscode.window.showInputBox({ prompt: 'Enter the start line number' });
-  if (!startLineStr) {return;}
-  const startLine = parseInt(startLineStr);
-
-  const endLineStr = await vscode.window.showInputBox({ prompt: 'Enter the end line number' });
-  if (!endLineStr) {return;}
-  const endLine = parseInt(endLineStr);
-
   const tagType = await vscode.window.showQuickPick(tagTypes, { placeHolder: 'Select the tag type' });
   if (!tagType) {return;}
 
-  await addTagToFile(filePath, tagName, startLine, endLine, tagType);
+  // Call addTagToFile without line numbers
+  await addTagToFile(filePath, tagName, tagType, undefined, undefined);
 
   vscode.window.showInformationMessage(`Tag added to ${filePath}`);
 }
@@ -61,17 +54,13 @@ export async function addTagToFileCommand(uri: vscode.Uri) {
   const filePath = uri.fsPath;
 
   const tagName = await vscode.window.showInputBox({ prompt: 'Enter the tag name' });
-  if (!tagName) return;
+  if (!tagName) {return;}
 
   const tagType = await vscode.window.showQuickPick(tagTypes, { placeHolder: 'Select the tag type' });
-  if (!tagType) return;
+  if (!tagType) {return;}
 
-  // Get the total number of lines in the file
-  const document = await vscode.workspace.openTextDocument(uri);
-  const totalLines = document.lineCount;
+  // Tag the entire file without line numbers
+  await addTagToFile(filePath, tagName, tagType, undefined, undefined);
 
-  // Tag the entire file
-  await addTagToFile(filePath, tagName, 0, totalLines - 1, tagType);
-
-  vscode.window.showInformationMessage(`Tag added to ${filePath}`);
+  vscode.window.showInformationMessage(`Tag added.`);
 }

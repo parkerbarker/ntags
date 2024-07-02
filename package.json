@@ -29,6 +29,14 @@
           "group": "navigation"
         }
       ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "ntag.tagsView",
+          "name": "Tags View"
+        }
+      ]
     }
   },
   "scripts": {
