@@ -1,6 +1,6 @@
 {
-  "name": "ntag",
-  "displayName": "nTag",
+  "name": "ntags",
+  "displayName": "nTags",
   "description": "Navigate using Tags",
   "version": "0.0.1",
   "engines": {
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "nTag.addTag",
-        "title": "nTag: Add Tag"
+        "command": "nTags.addTag",
+        "title": "nTags: Add Tag"
       }
     ]
   },
