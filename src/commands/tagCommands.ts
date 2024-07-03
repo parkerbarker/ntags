@@ -15,7 +15,7 @@ export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
   }
   if (!filePath) {return;}
 
-  const tagName = await vscode.window.showInputBox({ prompt: 'Enter the tag name' });
+  const tagName = await vscode.window.showInputBox({ prompt: 'namespace:tag' });
   if (!tagName) {return;}
 
   // Call addTagToFile without line numbers
@@ -29,7 +29,7 @@ export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
 export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
   const filePath = uri.fsPath;
 
-  const tagName = await vscode.window.showInputBox({ prompt: 'Enter the tag name' });
+  const tagName = await vscode.window.showInputBox({ prompt: 'namespace:tag' });
   if (!tagName) {return;}
 
   // Tag the entire file without line numbers
