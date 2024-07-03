@@ -34,7 +34,8 @@
       "explorer/context": [
         {
           "command": "ntags.addTagToFile",
-          "group": "inline"
+          "group": "inline",
+          "when": "explorerResourceIsFolder == false"
         }
       ],
       "view/item/context": [

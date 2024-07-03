@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+// import { promises as fs } from 'fs';
 import {TagsViewProvider} from '../views/tagView';
 import { addTagToFile } from '../services/tagService';
 import { getTags, removeTagFromFile } from '../data/database';
@@ -28,6 +30,12 @@ export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
 
 export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
   const filePath = uri.fsPath;
+
+  const isDir = fs.existsSync(filePath) && fs.lstatSync(filePath).isDirectory();
+  if (isDir) {
+    vscode.window.showInformationMessage(`nTag does not currently support folders.`);
+    return;
+  }
 
   const tagName = await vscode.window.showInputBox({ prompt: 'namespace:tag' });
   if (!tagName) {return;}
