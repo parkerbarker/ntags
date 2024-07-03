@@ -1,51 +1,64 @@
 # nTags README
 
-This is the README for your extension "ntags". After writing up a brief description, we recommend including the following sections.
+nTags (Navigational Tags) is a Visual Studio Code extension designed to help you efficiently navigate and manage your codebase using customizable tags. With nTags, you can create and manage tags for functions, classes, variables, and more, and organize them with namespaces for better categorization.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Robust Tagging**: Tag various code elements such as functions, classes, variables, conditional statements, loops, imports, and custom code blocks.
+- **Namespace Support**: Organize tags with namespaces for better categorization (e.g., `user:cameron`, `feature:cards`).
+- **Accurate and Dynamic**: Seamless integration with Git ensures that tags remain accurate and up-to-date across code changes.
+- **Real-time and Historical Tracking**: Provides real-time updates to tags as code is edited and committed. Maintains historical tracking of tags, allowing developers to view tags as they were at any point in the project’s history.
+- **Tag View**: A dedicated Tags View panel to browse and manage your tags. Displays nested folders and files, and supports right-click context menus similar to the Explorer view.
 
-For example if there is an image subfolder under your extension project workspace:
+### Screenshots
 
-\!\[feature X\]\(images/feature-x.png\)
+\!\[Tags View\]\(images/tags-view.png\)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+> Tip: Short, focused animations can be used here to show the extension in action.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- **VS Code**: Version 1.90.0 or later.
+- **Node.js**: Version 12 or later.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- `ntags.enable`: Enable/disable this extension.
+- `ntags.defaultNamespace`: Set a default namespace for tags.
+
+## Commands
+
+The extension provides several commands accessible via the Command Palette (Ctrl+Shift+P or Cmd+Shift+P):
+
+- `nTags: Add Tag` - Add a new tag.
+- `nTags: Select Tag` - Select a tag to filter.
+- `nTags: Add Tag to File` - Add a tag to a specific file.
+- `nTags: Remove Tag` - Remove a tag from a specific file.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- [ ] Tagging large codebases might slow down the extension's performance.
+- [ ] Namespace filtering may not work correctly if tags are not properly formatted.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
+- Initial release of nTags.
+- Basic tagging functionality.
+- Namespace support.
+- Git integration for dynamic tag updates.
 
 ### 1.0.1
 
-Fixed issue #.
+- Fixed issue with tag creation in nested folders.
 
 ### 1.1.0
 
-Added features X, Y, and Z.
+- Added features for real-time and historical tracking of tags.
+- Improved user interface with a dedicated Tags View panel.
 
 ---
 
