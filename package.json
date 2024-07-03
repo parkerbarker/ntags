@@ -58,7 +58,13 @@
           "name": "Tags View"
         }
       ]
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "ntags.tagsView",
+        "contents": "Welcome to nTags! [learn more](https://google.com/).\n[Select Tag](command:ntags.selectTag)\n[~Import Tags~](command:ntags.selectTag)"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
