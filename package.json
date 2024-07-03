@@ -34,19 +34,19 @@
       "explorer/context": [
         {
           "command": "ntags.addTagToFile",
-          "group": "navigation"
+          "group": "inline"
         }
       ],
       "view/item/context": [
         {
           "command": "ntags.addTagToFile",
           "when": "view == ntags.tagsView && viewItem == file",
-          "group": "inline"
+          "group": "navigation"
         },
         {
           "command": "ntags.removeTag",
           "when": "view == ntags.tagsView && viewItem == file",
-          "group": "inline"
+          "group": "navigation"
         }
       ]
     },
