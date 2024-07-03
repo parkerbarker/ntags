@@ -5,19 +5,6 @@ import { getTags, removeTagFromFile } from '../data/database';
 
 
 export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
-  const tagTypes = [
-    'function',
-    'class',
-    'variable',
-    'condition',
-    'loop',
-    'import',
-    'custom',
-    'comment',
-    'interface',
-    'todo'
-  ];
-
   const editor = vscode.window.activeTextEditor;
   let filePath;
 
@@ -31,11 +18,8 @@ export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
   const tagName = await vscode.window.showInputBox({ prompt: 'Enter the tag name' });
   if (!tagName) {return;}
 
-  const tagType = await vscode.window.showQuickPick(tagTypes, { placeHolder: 'Select the tag type' });
-  if (!tagType) {return;}
-
   // Call addTagToFile without line numbers
-  await addTagToFile(filePath, tagName, tagType, undefined, undefined, () => {
+  await addTagToFile(filePath, tagName, undefined, undefined, undefined, () => {
     tagsViewProvider.refresh();
   });
 
@@ -43,29 +27,13 @@ export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
 }
 
 export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
-  const tagTypes = [
-    'function',
-    'class',
-    'variable',
-    'condition',
-    'loop',
-    'import',
-    'custom',
-    'comment',
-    'interface',
-    'todo'
-  ];
-
   const filePath = uri.fsPath;
 
   const tagName = await vscode.window.showInputBox({ prompt: 'Enter the tag name' });
   if (!tagName) {return;}
 
-  const tagType = await vscode.window.showQuickPick(tagTypes, { placeHolder: 'Select the tag type' });
-  if (!tagType) {return;}
-
   // Tag the entire file without line numbers
-  await addTagToFile(filePath, tagName, tagType, undefined, undefined, () => {
+  await addTagToFile(filePath, tagName, undefined, undefined, undefined, () => {
     tagsViewProvider.refresh();
   });
 

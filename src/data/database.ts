@@ -24,7 +24,7 @@ export async function initializeDatabase() {
       tag_id INTEGER,
       start_line INTEGER NULL,
       end_line INTEGER NULL,
-      tag_type TEXT,
+      tag_type TEXT NULL,
       FOREIGN KEY (file_id) REFERENCES Files(file_id),
       FOREIGN KEY (tag_id) REFERENCES Tags(tag_id)
     );
@@ -61,9 +61,9 @@ export function addTag(tagName: string): number {
 }
 
 // Add a new file tag
-export function addFileTag(fileId: number, tagId: number, tagType: string, startLine?: number, endLine?: number): number {
+export function addFileTag(fileId: number, tagId: number, tagType?: string, startLine?: number, endLine?: number): number {
   const stmt = db.prepare('INSERT INTO FileTags (file_id, tag_id, start_line, end_line, tag_type) VALUES (?, ?, ?, ?, ?)');
-  stmt.run([fileId, tagId, startLine ?? null, endLine ?? null, tagType]);
+  stmt.run([fileId, tagId, startLine ?? null, endLine ?? null, tagType ?? null]);
   const result = db.exec('SELECT last_insert_rowid() AS file_tag_id');
   return result[0].values[0][0] as number;
 }

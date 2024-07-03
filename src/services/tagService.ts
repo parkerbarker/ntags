@@ -2,7 +2,7 @@ import { db, addFile, addTag, addFileTag, deleteTag } from '../data/database';
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export async function addTagToFile(filePath: string, tagName: string, tagType: string, startLine?: number, endLine?: number, refreshCallback?: () => void): Promise<void> {
+export async function addTagToFile(filePath: string, tagName: string, tagType?: string, startLine?: number, endLine?: number, refreshCallback?: () => void): Promise<void> {
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
   if (!workspaceFolder) {
     vscode.window.showErrorMessage('File is not within a workspace folder');
