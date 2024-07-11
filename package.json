@@ -32,6 +32,14 @@
       {
         "command": "ntags.removeTag",
         "title": "Remove Tag"
+      },
+      {
+        "command": "ntags.saveDatabase",
+        "title": "Icon",
+        "icon": {
+          "light": "media/floppy-disk-333.svg",
+          "dark": "media/floppy-disk-f4f.svg"
+        }
       }
     ],
     "menus": {
@@ -40,6 +48,13 @@
           "command": "ntags.addTagToFile",
           "group": "inline",
           "when": "explorerResourceIsFolder == false"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "ntags.saveDatabase",
+          "when": "view == ntags.tagsView",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -66,7 +81,7 @@
     "viewsWelcome": [
       {
         "view": "ntags.tagsView",
-        "contents": "Welcome to nTags! [learn more](https://google.com/).\n[Select Tag](command:ntags.selectTag)\n[~Import Tags~](command:ntags.selectTag)"
+        "contents": "Welcome to nTags! Navigational Tags (nTags) is a VS Code extension for enhanced code navigation and organization.\n\n[Select Tag](command:ntags.selectTag)\n[Import Tags](command:ntags.importTags)\n[Export Tags](command:ntags.exportTags)"
       }
     ]
   },

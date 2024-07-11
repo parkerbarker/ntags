@@ -3,7 +3,7 @@ import * as fs from 'fs';
 // import { promises as fs } from 'fs';
 import {TagsViewProvider} from '../views/tagView';
 import { addTagToFile } from '../services/tagService';
-import { getTags, removeTagFromFile } from '../data/database';
+import { getTags, removeTagFromFile, saveDatabase } from '../data/database';
 
 
 export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
@@ -85,4 +85,10 @@ export async function removeTagCommand(tagsViewProvider: TagsViewProvider) {
   });
 
   vscode.window.showInformationMessage(`Tag removed from ${filePath}`);
+}
+
+export async function saveDatabaseCommand(tagsViewProvider: TagsViewProvider) {
+  const databasePath = saveDatabase();
+  tagsViewProvider.refresh();
+  vscode.window.showInformationMessage(`Save: ${databasePath}`);
 }

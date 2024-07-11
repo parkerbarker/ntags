@@ -1,12 +1,38 @@
+import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import initSqlJs, { Database, SqlValue } from 'sql.js';
 import { getDiff, adjustTagPositions } from '../services/gitService';
 
 let db: Database;
 
+async function getDatabaseFilePath(): Promise<string> {
+  const storagePath = vscode.workspace.workspaceFolders
+    ? path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '.vscode', 'ntag')
+    : path.join(process.cwd(), '.vscode', 'ntag');
+
+  if (!fs.existsSync(storagePath)) {
+    fs.mkdirSync(storagePath, { recursive: true });
+  }
+
+  const dbName = vscode.workspace.workspaceFolders?.[0]?.name ?? "unknown";
+  return path.join(storagePath, `${dbName}.sqlite`);
+}
+
 export async function initializeDatabase() {
   const SQL = await initSqlJs();
-  db = new SQL.Database();
+  const dbFilePath = await getDatabaseFilePath();
 
+  if (fs.existsSync(dbFilePath)) {
+    const fileBuffer = fs.readFileSync(dbFilePath);
+    db = new SQL.Database(fileBuffer);
+  } else {
+    db = new SQL.Database();
+    createTables();
+  }
+}
+
+function createTables() {
   db.run(`
     CREATE TABLE IF NOT EXISTS Files (
       file_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +57,15 @@ export async function initializeDatabase() {
   `);
 }
 
+export async function saveDatabase(): Promise<string> {
+  const dbFilePath = await getDatabaseFilePath();
+  const data = db.export();
+  fs.writeFileSync(dbFilePath, Buffer.from(data));
+  return dbFilePath;
+}
+
 export function closeDatabase() {
+  saveDatabase();
   db.close();
 }
 
