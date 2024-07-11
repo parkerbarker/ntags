@@ -64,7 +64,7 @@ export async function saveDatabase(): Promise<string> {
   return dbFilePath;
 }
 
-export function closeDatabase() {
+export async function closeDatabase() {
   saveDatabase();
   db.close();
 }
