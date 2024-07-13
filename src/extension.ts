@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { initializeDatabase, closeDatabase } from './data/database';
 import { TagsViewProvider } from './views/tagView';
 import {
-  addTagCommand,
   addTagToFileCommand,
   selectTagCommand,
   removeTagCommand,
@@ -16,10 +15,6 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider('ntags.tagsView', tagsViewProvider);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('ntags.addTag', async () => {
-      await addTagCommand(tagsViewProvider);
-      tagsViewProvider.refresh();
-    }),
     vscode.commands.registerCommand('ntags.addTagToFile', async (uri: vscode.Uri) => {
       await addTagToFileCommand(uri, tagsViewProvider);
       tagsViewProvider.refresh();

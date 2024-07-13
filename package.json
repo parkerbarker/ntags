@@ -18,10 +18,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "ntags.addTag",
-        "title": "nTags: Add Tag"
-      },
-      {
         "command": "ntags.selectTag",
         "title": "nTags: Select Tag"
       },

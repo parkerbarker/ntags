@@ -42,6 +42,7 @@ function createTables() {
     CREATE TABLE IF NOT EXISTS Tags (
       tag_id INTEGER PRIMARY KEY AUTOINCREMENT,
       tag_name TEXT
+      namespace TEXT
     );
 
     CREATE TABLE IF NOT EXISTS FileTags (

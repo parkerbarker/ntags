@@ -1,51 +1,42 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 // import { promises as fs } from 'fs';
-import {TagsViewProvider} from '../views/tagView';
 import { addTagToFile } from '../services/tagService';
+import {TagsViewProvider} from '../views/tagView';
+import { showCustomQuickPick, QuickPickSection } from "../views/quickPick";
 import { getTags, removeTagFromFile, saveDatabase } from '../data/database';
-
-
-export async function addTagCommand(tagsViewProvider: TagsViewProvider) {
-  const editor = vscode.window.activeTextEditor;
-  let filePath;
-
-  if (!editor) {
-    filePath = await vscode.window.showInputBox({ prompt: 'Enter the file path' });
-  } else {
-    filePath = editor.document.uri.fsPath;
-  }
-  if (!filePath) {return;}
-
-  const tagName = await vscode.window.showInputBox({ prompt: 'namespace:tag' });
-  if (!tagName) {return;}
-
-  // Call addTagToFile without line numbers
-  await addTagToFile(filePath, tagName, undefined, undefined, undefined, () => {
-    tagsViewProvider.refresh();
-  });
-
-  vscode.window.showInformationMessage(`Tag added to ${filePath}`);
-}
 
 export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
   const filePath = uri.fsPath;
 
+  // check if this is a folder aka directory
   const isDir = fs.existsSync(filePath) && fs.lstatSync(filePath).isDirectory();
+  // TODO: Have this add all files under the selected folder. Probablly good to include a confirmation with the amount of files.
   if (isDir) {
     vscode.window.showInformationMessage(`nTag does not currently support folders.`);
     return;
   }
 
-  const tagName = await vscode.window.showInputBox({ prompt: 'namespace:tag' });
-  if (!tagName) {return;}
+  const sections: QuickPickSection[] = [
+      {
+          label: 'Recent Tags',
+          values: ['team:app-ui', 'feature:dogs-away']
+      },
+      {
+          label: 'Namespace',
+          values: ['user:', 'pr:', 'team:', 'feature:']
+      }
+  ];
+
+  const selectedValue = await showCustomQuickPick(sections);
+
+  if (!selectedValue) {return}
 
   // Tag the entire file without line numbers
-  await addTagToFile(filePath, tagName, undefined, undefined, undefined, () => {
+  await addTagToFile(filePath, selectedValue, undefined, undefined, undefined, () => {
     tagsViewProvider.refresh();
+    vscode.window.showInformationMessage(`nTag Added.`);
   });
-
-  vscode.window.showInformationMessage(`Tag added.`);
 }
 
 export async function selectTagCommand(tagsViewProvider: TagsViewProvider) {
