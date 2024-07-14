@@ -12,26 +12,26 @@ export function showCustomQuickPick(sections: QuickPickSection[]): Promise<strin
         quickPick.canSelectMany = false; // Allow only single selection
         quickPick.ignoreFocusOut = true; // Keep the Quick Pick open even when focus is lost
 
-        const items = sections.flatMap(section => [
+        const allItems = sections.flatMap(section => [
             { label: section.label, kind: vscode.QuickPickItemKind.Separator },
             ...section.values.map(value => ({ label: value }))
         ]);
 
-        quickPick.items = items;
+        // TODO: Limit items to have a limit of 3 items initially
+        quickPick.items = allItems;
+
+        quickPick.onDidChangeValue(value => {
+            const filteredItems = allItems.filter(item => item.label.includes(value));
+            quickPick.items = [
+                ...filteredItems.slice(0, 6),
+                { label: value, description: 'Press Enter to select this custom value' }
+            ];
+        });
 
         quickPick.onDidChangeSelection(selection => {
             if (selection[0]) {
                 resolve(selection[0].label);
                 quickPick.hide();
-            }
-        });
-
-        quickPick.onDidChangeValue(value => {
-            if (value) {
-                quickPick.items = [
-                    ...items,
-                    { label: value, description: 'Press Enter to select this custom value' }
-                ];
             }
         });
 

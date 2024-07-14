@@ -20,7 +20,8 @@ export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
   const sections: QuickPickSection[] = [
       {
           label: 'Recent Tags',
-          values: ['team:app-ui', 'feature:dogs-away']
+          values: Array.from({ length: 1000 }, (_, i) => `tag-${i}`)
+          // values: ['team:app-ui', 'feature:dogs-away']
       },
       {
           label: 'Namespace',
@@ -30,7 +31,7 @@ export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
 
   const selectedValue = await showCustomQuickPick(sections);
 
-  if (!selectedValue) {return}
+  if (!selectedValue) {return;}
 
   // Tag the entire file without line numbers
   await addTagToFile(filePath, selectedValue, undefined, undefined, undefined, () => {
