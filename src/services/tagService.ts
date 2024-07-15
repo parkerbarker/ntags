@@ -1,4 +1,4 @@
-import { db, addFile, addTag, addFileTag, deleteFileTag, cleanUpTags } from '../data/database';
+import { db, addFile, addTag, addFileTag, deleteFileTag, cleanUpTags, getTagsForFile } from '../data/database';
 import * as vscode from 'vscode';
 import * as path from 'path';
 
@@ -26,6 +26,17 @@ export async function removeTagFromFile(uri: vscode.Uri, tagName: string, refres
   cleanUpTags();
 
   callRefreshCallbackIfProvided(refreshCallback);
+}
+
+export function getFileTags(uri: vscode.Uri): string[] {
+  const workspaceAndPath = getWorkspaceAndRelativePath(uri);
+  if (!workspaceAndPath) { return []; }
+  const { relativePath } = workspaceAndPath;
+
+  const tagResults = getTagsForFile(relativePath);
+
+  const tags = tagResults.map(row => row.tag_name);
+  return tags;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

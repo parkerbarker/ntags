@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 // import { promises as fs } from 'fs';
-import { addTagToFile, removeTagFromFile } from '../services/tagService';
+import { addTagToFile, removeTagFromFile, getFileTags } from '../services/tagService';
 import {TagsViewProvider} from '../views/tagView';
 import { showCustomQuickPick, QuickPickSection } from "../views/quickPick";
 import { getTags, saveDatabase } from '../data/database';
@@ -54,7 +54,7 @@ export async function selectTagCommand(tagsViewProvider: TagsViewProvider) {
 }
 
 export async function removeTagCommand(uri: vscode.Uri, tagsViewProvider: TagsViewProvider) {
-  const tags = await getTags();
+  const tags = await getFileTags(uri);
 
   const selectedTag = await vscode.window.showQuickPick(tags, {
     placeHolder: 'Select a tag to remove'

@@ -71,9 +71,6 @@ export { db };
 
 interface TagRow {
   tag_name: string;
-  start_line: number;
-  end_line: number;
-  tag_type: string;
 }
 
 // Add a new file
