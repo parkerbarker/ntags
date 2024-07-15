@@ -29,7 +29,7 @@ suite('Database Functions Test Suite', function() {
   });
 
   test('should add a new file tag', async () => {
-    fileTagId = addFileTag(fileId, tagId, 'function', 1, 10);
+    fileTagId = addFileTag(fileId, tagId);
     assert.ok(fileTagId > 0, `Expected fileTagId to be greater than 0, but got ${fileTagId}`);
   });
 

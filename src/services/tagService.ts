@@ -1,67 +1,62 @@
-import { db, addFile, addTag, addFileTag, deleteTag } from '../data/database';
+import { db, addFile, addTag, addFileTag, deleteFileTag, cleanUpTags } from '../data/database';
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export async function addTagToFile(filePath: string, fullTagName: string, startLine?: number, endLine?: number, tagType?: string, refreshCallback?: () => void): Promise<void> {
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
-  if (!workspaceFolder) {
-    vscode.window.showErrorMessage('File is not within a workspace folder');
-    return;
-  }
-  const relativePath = path.relative(workspaceFolder.uri.fsPath, filePath);
+export async function addTagToFile(uri: vscode.Uri, fullTagName: string, refreshCallback?: () => void): Promise<void> {
+  const workspaceAndPath = getWorkspaceAndRelativePath(uri);
+  if (!workspaceAndPath) {return;}
+  const { relativePath } = workspaceAndPath;
 
-  // Split the full tag name into namespace and tagName
-  const [namespace, tagName] = fullTagName.includes(':') ? fullTagName.split(':') : ['', fullTagName];
+  const fileId = await ensureFileExists(relativePath);
+  const tagId = await ensureTagExists(fullTagName.includes(':') ? fullTagName : `:${fullTagName}`);
 
-  // Ensure the file exists in the Files table
-  const fileIdResult = db.exec('SELECT file_id FROM Files WHERE file_path = ?', [relativePath]);
-  let fileId;
-  if (fileIdResult.length === 0) {
-    fileId = addFile(relativePath);
-  } else {
-    fileId = fileIdResult[0].values[0][0] as number;
-  }
-
-  // Ensure the tag exists in the Tags table
-  const tagIdResult = db.exec('SELECT tag_id FROM Tags WHERE tag_name = ?', [`${namespace}:${tagName}`]);
-  let tagId;
-  if (tagIdResult.length === 0) {
-    tagId = addTag(`${namespace}:${tagName}`);
-  } else {
-    tagId = tagIdResult[0].values[0][0] as number;
-  }
-
-  // Add the file tag to the FileTags table
-  addFileTag(fileId, tagId, tagType, startLine, endLine);
-
-  // Call the refresh callback if provided
-  if (refreshCallback) {
-    refreshCallback();
-  }
+  addFileTag(fileId, tagId);
+  callRefreshCallbackIfProvided(refreshCallback);
 }
 
-export async function removeTagFromFile(filePath: string, tagName: string, refreshCallback?: () => void): Promise<void> {
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
+export async function removeTagFromFile(uri: vscode.Uri, tagName: string, refreshCallback?: () => void): Promise<void> {
+  const workspaceAndPath = getWorkspaceAndRelativePath(uri);
+  if (!workspaceAndPath) {return;}
+  const { relativePath } = workspaceAndPath;
+
+  const fileId = await ensureFileExists(relativePath);
+  const tagId = await ensureTagExists(tagName);
+
+  deleteFileTag(tagId, fileId);
+  cleanUpTags();
+
+  callRefreshCallbackIfProvided(refreshCallback);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getWorkspaceAndRelativePath(fileItem: any): { workspaceFolder: vscode.WorkspaceFolder, relativePath: string } | null {
+   // Extract the vscode.Uri object from the FileItem
+   const uri: vscode.Uri = fileItem.uri ? fileItem.uri : fileItem;
+
+   // Find the workspace folder that contains the file
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
   if (!workspaceFolder) {
     vscode.window.showErrorMessage('File is not within a workspace folder');
-    return;
+    return null;
   }
-  const relativePath = path.relative(workspaceFolder.uri.fsPath, filePath);
 
+  // Calculate the relative path of the file to the workspace folder
+  const relativePath = path.relative(workspaceFolder.uri.fsPath, uri.fsPath);
+
+  return { workspaceFolder: workspaceFolder, relativePath };
+}
+
+async function ensureFileExists(relativePath: string): Promise<number> {
   const fileIdResult = db.exec('SELECT file_id FROM Files WHERE file_path = ?', [relativePath]);
-  if (fileIdResult.length === 0) {
-    return;
-  }
+  return fileIdResult.length === 0 ? addFile(relativePath) : fileIdResult[0].values[0][0] as number;
+}
 
-  const tagIdResult = db.exec('SELECT tag_id FROM Tags WHERE tag_name = ?', [tagName]);
-  if (tagIdResult.length === 0) {
-    return;
-  }
-  const tagId = tagIdResult[0].values[0][0] as number;
+async function ensureTagExists(fullTagName: string): Promise<number> {
+  const tagIdResult = db.exec('SELECT tag_id FROM Tags WHERE tag_name = ?', [fullTagName]);
+  return tagIdResult.length === 0 ? addTag(fullTagName) : tagIdResult[0].values[0][0] as number;
+}
 
-  deleteTag(tagId);
-
-  // Call the refresh callback if provided
+function callRefreshCallbackIfProvided(refreshCallback?: () => void): void {
   if (refreshCallback) {
     refreshCallback();
   }

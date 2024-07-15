@@ -49,9 +49,6 @@ function createTables() {
       file_tag_id INTEGER PRIMARY KEY AUTOINCREMENT,
       file_id INTEGER,
       tag_id INTEGER,
-      start_line INTEGER NULL,
-      end_line INTEGER NULL,
-      tag_type TEXT NULL,
       FOREIGN KEY (file_id) REFERENCES Files(file_id),
       FOREIGN KEY (tag_id) REFERENCES Tags(tag_id)
     );
@@ -96,17 +93,22 @@ export function addTag(tagName: string): number {
 }
 
 // Add a new file tag
-export function addFileTag(fileId: number, tagId: number, tagType?: string, startLine?: number, endLine?: number): number {
-  const stmt = db.prepare('INSERT INTO FileTags (file_id, tag_id, start_line, end_line, tag_type) VALUES (?, ?, ?, ?, ?)');
-  stmt.run([fileId, tagId, startLine ?? null, endLine ?? null, tagType ?? null]);
+export function addFileTag(fileId: number, tagId: number): number {
+  const stmt = db.prepare('INSERT INTO FileTags (file_id, tag_id) VALUES (?, ?)');
+  stmt.run([fileId, tagId]);
   const result = db.exec('SELECT last_insert_rowid() AS file_tag_id');
   return result[0].values[0][0] as number;
+}
+
+export function deleteFileTag(tagId: number, fileId: number): void {
+  const stmt = db.prepare('DELETE FROM FileTags WHERE tag_id = ? AND file_id = ?');
+  stmt.run([tagId, fileId]);
 }
 
 // Retrieve tags for a specific file
 export function getTagsForFile(filePath: string): TagRow[] {
   const stmt = db.prepare(`
-    SELECT Tags.tag_name, FileTags.start_line, FileTags.end_line, FileTags.tag_type
+    SELECT Tags.tag_name
     FROM FileTags
     JOIN Files ON FileTags.file_id = Files.file_id
     JOIN Tags ON FileTags.tag_id = Tags.tag_id
@@ -135,6 +137,9 @@ export function getFilePathsForTag(tagName: string): string[] {
 }
 
 // Delete a tag
+export function cleanUpTags(): void {
+  db.exec('DELETE FROM Tags WHERE tag_id NOT IN (SELECT tag_id FROM FileTags);');
+}
 export function deleteTag(tagId: number): void {
   const stmt = db.prepare('DELETE FROM Tags WHERE tag_id = ?');
   stmt.run([tagId]);
@@ -147,26 +152,6 @@ export function getTags(): string[] {
 
   const tags = tagResults[0].values.map(row => row[0] as string);
   return tags;
-}
-
-export async function removeTagFromFile(filePath: string, tagName: string, refreshCallback?: () => void): Promise<void> {
-  const fileIdResult = db.exec('SELECT file_id FROM Files WHERE file_path = ?', [filePath]);
-  if (fileIdResult.length === 0) {
-    return;
-  }
-
-  const tagIdResult = db.exec('SELECT tag_id FROM Tags WHERE tag_name = ?', [tagName]);
-  if (tagIdResult.length === 0) {
-    return;
-  }
-  const tagId = tagIdResult[0].values[0][0] as number;
-
-  deleteTag(tagId);
-
-  // Call the refresh callback if provided
-  if (refreshCallback) {
-    refreshCallback();
-  }
 }
 
 // Adjust tag positions based on Git diff

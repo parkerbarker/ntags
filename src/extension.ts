@@ -15,6 +15,10 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.registerTreeDataProvider('ntags.tagsView', tagsViewProvider);
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('ntags.saveDatabase', async () => {
+      await saveDatabaseCommand(tagsViewProvider);
+      tagsViewProvider.refresh();
+    }),
     vscode.commands.registerCommand('ntags.addTagToFile', async (uri: vscode.Uri) => {
       await addTagToFileCommand(uri, tagsViewProvider);
       tagsViewProvider.refresh();
@@ -22,12 +26,8 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('ntags.selectTag', async () => {
       await selectTagCommand(tagsViewProvider);
     }),
-    vscode.commands.registerCommand('ntags.saveDatabase', async () => {
-      await saveDatabaseCommand(tagsViewProvider);
-      tagsViewProvider.refresh();
-    }),
-    vscode.commands.registerCommand('ntags.removeTag', async () => {
-      await removeTagCommand(tagsViewProvider);
+    vscode.commands.registerCommand('ntags.removeTag', async (uri: vscode.Uri) => {
+      await removeTagCommand(uri, tagsViewProvider);
       tagsViewProvider.refresh();
     }),
   );

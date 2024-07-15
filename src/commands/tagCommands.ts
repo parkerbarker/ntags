@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 // import { promises as fs } from 'fs';
-import { addTagToFile } from '../services/tagService';
+import { addTagToFile, removeTagFromFile } from '../services/tagService';
 import {TagsViewProvider} from '../views/tagView';
 import { showCustomQuickPick, QuickPickSection } from "../views/quickPick";
-import { getTags, removeTagFromFile, saveDatabase } from '../data/database';
+import { getTags, saveDatabase } from '../data/database';
 
 export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
   const filePath = uri.fsPath;
@@ -34,7 +34,7 @@ export async function addTagToFileCommand(uri: vscode.Uri, tagsViewProvider) {
   if (!selectedValue) {return;}
 
   // Tag the entire file without line numbers
-  await addTagToFile(filePath, selectedValue, undefined, undefined, undefined, () => {
+  await addTagToFile(uri, selectedValue, () => {
     tagsViewProvider.refresh();
     vscode.window.showInformationMessage(`nTag Added.`);
   });
@@ -53,7 +53,7 @@ export async function selectTagCommand(tagsViewProvider: TagsViewProvider) {
   }
 }
 
-export async function removeTagCommand(tagsViewProvider: TagsViewProvider) {
+export async function removeTagCommand(uri: vscode.Uri, tagsViewProvider: TagsViewProvider) {
   const tags = await getTags();
 
   const selectedTag = await vscode.window.showQuickPick(tags, {
@@ -62,21 +62,11 @@ export async function removeTagCommand(tagsViewProvider: TagsViewProvider) {
 
   if (!selectedTag) {return;}
 
-  const editor = vscode.window.activeTextEditor;
-  let filePath;
-
-  if (!editor) {
-    filePath = await vscode.window.showInputBox({ prompt: 'Enter the file path' });
-  } else {
-    filePath = editor.document.uri.fsPath;
-  }
-  if (!filePath) {return;}
-
-  await removeTagFromFile(filePath, selectedTag, () => {
+  await removeTagFromFile(uri, selectedTag, () => {
     tagsViewProvider.refresh();
   });
 
-  vscode.window.showInformationMessage(`Tag removed from ${filePath}`);
+  vscode.window.showInformationMessage(`Tag removed.`);
 }
 
 export async function saveDatabaseCommand(tagsViewProvider: TagsViewProvider) {
