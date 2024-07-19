@@ -19,7 +19,11 @@
     "commands": [
       {
         "command": "ntags.selectTag",
-        "title": "nTags: Select Tag"
+        "title": "nTags: Select Tag",
+        "icon": {
+          "light": "media/symbol-numeric.svg",
+          "dark": "media/symbol-numeric.svg"
+        }
       },
       {
         "command": "ntags.addTagToFile",
@@ -32,10 +36,7 @@
       {
         "command": "ntags.saveDatabase",
         "title": "Icon",
-        "icon": {
-          "light": "media/floppy-disk-333.svg",
-          "dark": "media/floppy-disk-f4f.svg"
-        }
+        "icon": "media/save-light.svg"
       }
     ],
     "menus": {
@@ -49,6 +50,11 @@
       "view/title": [
         {
           "command": "ntags.saveDatabase",
+          "when": "view == ntags.tagsView",
+          "group": "navigation"
+        },
+        {
+          "command": "ntags.selectTag",
           "when": "view == ntags.tagsView",
           "group": "navigation"
         }
@@ -67,10 +73,19 @@
       ]
     },
     "views": {
-      "explorer": [
+      "nTags": [
         {
           "id": "ntags.tagsView",
-          "name": "Tags View"
+          "name": ""
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "nTags",
+          "title": "nTags",
+          "icon": "media/symbol-numeric.svg"
         }
       ]
     },
