@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { initializeDatabase, closeDatabase } from "./data/database";
 import { TagsViewProvider } from "./views/tagView";
 import { TagsPickerViewProvider } from "./views/tagPickerView";
+import SettingsService from "./services/settingService";
 import {
   addTagToFileCommand,
   selectTagCommand,
@@ -61,4 +62,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
   closeDatabase();
+  // Optionally, reset the files.exclude setting when the extension is deactivated
+  SettingsService.resetFilesExclude().then(
+    () => {
+      vscode.window.showInformationMessage("Explorer view reset to default.");
+    },
+    (error) => {
+      vscode.window.showErrorMessage("Failed to reset Explorer view: " + error);
+    }
+  );
 }
