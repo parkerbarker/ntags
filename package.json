@@ -6,6 +6,7 @@
   "engines": {
     "vscode": "^1.90.0"
   },
+  "publisher": "ms-vscode",
   "repository": {
     "type": "git",
     "url": "https://github.com/parkerbarker/ntags.git"
